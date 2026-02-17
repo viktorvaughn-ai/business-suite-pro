@@ -1,5 +1,6 @@
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
+import { useAuth } from '@/context/AuthProvider';
 import {
   LayoutDashboard,
   Users,
@@ -19,6 +20,7 @@ import {
   Boxes,
 } from "lucide-react";
 import { useState } from "react";
+import { Button } from '@/components/ui/button';
 
 const navSections = [
   {
@@ -57,9 +59,9 @@ const navSections = [
   {
     label: "Configuration",
     items: [
-      { title: "Masters", url: "/masters", icon: Database },
+      { title: "Masters", url: "/masters", icon: Database, roles: ['admin'] },
       { title: "Field Registry", url: "/field-registry", icon: SlidersHorizontal },
-      { title: "Settings", url: "/settings", icon: Settings },
+      { title: "Settings", url: "/settings", icon: Settings, roles: ['admin'] },
     ],
   },
 ];
@@ -67,6 +69,7 @@ const navSections = [
 export function AppSidebar() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const { roles } = useAuth();
 
   return (
     <aside
@@ -113,6 +116,10 @@ export function AppSidebar() {
             )}
             {collapsed && <div className="h-2" />}
             {section.items.map((item) => {
+              if (item.roles && item.roles.length > 0) {
+                const allowed = item.roles.some((r) => roles.includes(r));
+                if (!allowed) return null;
+              }
               const isActive =
                 item.url === "/"
                   ? location.pathname === "/"
@@ -141,21 +148,33 @@ export function AppSidebar() {
       {/* Footer */}
       {!collapsed && (
         <div className="p-3 border-t border-sidebar-border">
-          <div className="flex items-center gap-2 px-2 py-1.5">
-            <div className="w-7 h-7 rounded-full bg-sidebar-accent flex items-center justify-center text-xs font-medium text-sidebar-accent-foreground">
-              A
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-sidebar-accent-foreground truncate">
-                Admin User
-              </p>
-              <p className="text-[10px] text-sidebar-foreground truncate">
-                admin@company.com
-              </p>
-            </div>
-          </div>
+          <UserFooter />
         </div>
       )}
     </aside>
+  );
+}
+
+function UserFooter() {
+  const auth = useAuth();
+  const userEmail = auth.user?.email ?? 'Guest';
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 px-2 py-1.5">
+        <div className="w-7 h-7 rounded-full bg-sidebar-accent flex items-center justify-center text-xs font-medium text-sidebar-accent-foreground">
+          {userEmail.charAt(0).toUpperCase()}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-medium text-sidebar-accent-foreground truncate">{userEmail}</p>
+          <p className="text-[10px] text-sidebar-foreground truncate">{auth.roles.join(', ') || 'No role'}</p>
+        </div>
+        <div>
+          <Button variant="ghost" size="sm" onClick={() => auth.signOut()}>
+            Sign out
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

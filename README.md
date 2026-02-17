@@ -8,51 +8,29 @@
 
 There are several ways of editing your application.
 
-**Use Lovable**
+# EnterprisOS
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+This repository contains the EnterprisOS frontend built with Vite, TypeScript, React and Tailwind.
 
-Changes made via Lovable will be committed automatically to this repo.
+Supabase is configured for authentication and the database. See `supabase/init.sql` for the core schema used by the app (profiles, CRM, inventory, finance, HR, GST, and RBAC tables).
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Local setup
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm install
+cp .env.example .env.local
+# Edit .env.local with your Supabase URL and publishable key
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+DB setup
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Run `supabase/init.sql` in the Supabase SQL editor to create the required tables and trigger to populate `profiles` on user signup.
+- For production, keep service/DB connection strings out of client builds; store secrets in your hosting or server environment (do not prefix with `VITE_`).
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
+Tech stack
 
 - Vite
 - TypeScript
@@ -60,14 +38,12 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+- **Auth helper:** Use the React hook `useSupabaseAuth` at [src/hooks/use-supabase.ts](src/hooks/use-supabase.ts#L1-L999) to access `session`, `user`, and simple `signIn`/`signOut` helpers.
+- **Local dev:** create a `.env` (or `.env.local`) with values from your Supabase project, then run:
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+```sh
+npm i
+npm run dev
+```
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Keep secret keys out of client-side builds and only use service role keys on trusted servers.
